@@ -12,10 +12,13 @@ import net.minecraft.world.item.Item
 import net.neoforged.bus.api.IEventBus
 import net.neoforged.fml.ModContainer
 import net.neoforged.fml.common.Mod
+import net.neoforged.neoforge.common.NeoForge
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent
+import net.neoforged.neoforge.event.entity.living.LivingDeathEvent
 import net.neoforged.neoforge.registries.DeferredHolder
 import net.neoforged.neoforge.registries.DeferredItem
 import net.neoforged.neoforge.registries.DeferredRegister
+import net.minecraft.server.level.ServerLevel
 import java.util.function.Supplier
 
 @Mod(CanDoAnything.MODID)
@@ -25,6 +28,10 @@ class CanDoAnything(modEventBus: IEventBus, modContainer: ModContainer) {
         ITEMS.register(modEventBus)
         CREATIVE_MODE_TABS.register(modEventBus)
         modEventBus.addListener(::addCreative)
+
+        // Game events (death, etc.) go on the NeoForge event bus, not the mod bus
+        NeoForge.EVENT_BUS.addListener(::onLivingDeath)
+
         LOGGER.info("[CanDoAnything] Initialized")
     }
 
@@ -36,6 +43,21 @@ class CanDoAnything(modEventBus: IEventBus, modContainer: ModContainer) {
         if (event.tabKey == CreativeModeTabs.COMBAT) {
             event.accept(AMETHYST_SWORD.get())
         }
+    }
+
+    private fun onLivingDeath(event: LivingDeathEvent) {
+        val dead = event.entity
+        if (!AmethystSwordItem.isTargetable(dead)) return
+
+        val serverLevel = dead.level() as? ServerLevel ?: return
+
+        // Check if the killer is holding the amethyst sword
+        val source = event.source.entity as? net.minecraft.world.entity.LivingEntity ?: return
+        val heldItem = source.mainHandItem
+        if (heldItem.item !is AmethystSwordItem) return
+
+        // Kill — release strong vibration from dead entity's position
+        AmethystSwordItem.releaseVibration(serverLevel, source, dead.blockPosition(), AmethystSwordItem.KILL_DAMAGE)
     }
 
     companion object {

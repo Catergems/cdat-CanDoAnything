@@ -22,9 +22,9 @@ import net.minecraft.world.phys.AABB
 class AmethystSwordItem(properties: Properties) : Item(properties) {
 
     companion object {
-        private const val VIBRATION_RADIUS = 10.0
-        private const val HIT_DAMAGE = 2.0
-        private const val KILL_DAMAGE = 5.0
+        const val VIBRATION_RADIUS = 10.0
+        const val HIT_DAMAGE = 2.0
+        const val KILL_DAMAGE = 5.0
 
         fun createAttributes(): ItemAttributeModifiers =
             ItemAttributeModifiers.builder()
@@ -48,10 +48,10 @@ class AmethystSwordItem(properties: Properties) : Item(properties) {
                 )
                 .build()
 
-        private fun isTargetable(entity: Entity): Boolean =
+        fun isTargetable(entity: Entity): Boolean =
             entity is Monster || entity is Animal
 
-        private fun releaseVibration(
+        fun releaseVibration(
             serverLevel: ServerLevel,
             attacker: LivingEntity,
             epicenter: BlockPos,
@@ -78,18 +78,12 @@ class AmethystSwordItem(properties: Properties) : Item(properties) {
         if (!isTargetable(target)) return
         val serverLevel = attacker.level() as? ServerLevel ?: return
 
+        // On hit (still alive) — small vibration pulse
         if (target.isAlive) {
             releaseVibration(serverLevel, attacker, target.blockPosition(), HIT_DAMAGE)
         }
 
         stack.hurtAndBreak(1, attacker, EquipmentSlot.MAINHAND)
-    }
-
-    override fun postHurtEnemy(stack: ItemStack, target: LivingEntity, attacker: LivingEntity) {
-        if (!target.isAlive && isTargetable(target)) {
-            val serverLevel = attacker.level() as? ServerLevel ?: return
-            releaseVibration(serverLevel, attacker, target.blockPosition(), KILL_DAMAGE)
-        }
     }
 
     override fun getDefaultAttributeModifiers(stack: ItemStack): ItemAttributeModifiers = createAttributes()
