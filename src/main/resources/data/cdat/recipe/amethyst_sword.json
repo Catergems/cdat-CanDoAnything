@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    " A ",
+    " B ",
+    " S "
+  ],
+  "key": {
+    "A": "minecraft:amethyst_shard",
+    "B": "minecraft:amethyst_block",
+    "S": "minecraft:stick"
+  },
+  "result": {
+    "id": "cdat:amethyst_sword",
+    "count": 1
+  }
+}

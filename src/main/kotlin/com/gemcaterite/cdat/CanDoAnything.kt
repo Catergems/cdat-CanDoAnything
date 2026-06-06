@@ -1,5 +1,6 @@
 package com.gemcaterite.cdat
 
+import com.gemcaterite.cdat.item.AmethystSwordItem
 import com.gemcaterite.cdat.item.DrillItem
 import com.gemcaterite.cdat.item.HammerItem
 import com.mojang.logging.LogUtils
@@ -32,6 +33,9 @@ class CanDoAnything(modEventBus: IEventBus, modContainer: ModContainer) {
             event.accept(DRILL.get())
             event.accept(HAMMER.get())
         }
+        if (event.tabKey == CreativeModeTabs.COMBAT) {
+            event.accept(AMETHYST_SWORD.get())
+        }
     }
 
     companion object {
@@ -50,6 +54,10 @@ class CanDoAnything(modEventBus: IEventBus, modContainer: ModContainer) {
             HammerItem(props.durability(256))
         }
 
+        val AMETHYST_SWORD: DeferredItem<Item> = ITEMS.registerItem("amethyst_sword") { props ->
+            AmethystSwordItem(props.durability(512))
+        }
+
         val CDA_TAB: DeferredHolder<CreativeModeTab, CreativeModeTab> =
             CREATIVE_MODE_TABS.register("main",
                 Supplier {
@@ -60,6 +68,7 @@ class CanDoAnything(modEventBus: IEventBus, modContainer: ModContainer) {
                         .displayItems { _, output ->
                             output.accept(DRILL.get())
                             output.accept(HAMMER.get())
+                            output.accept(AMETHYST_SWORD.get())
                         }
                         .build()
                 }
