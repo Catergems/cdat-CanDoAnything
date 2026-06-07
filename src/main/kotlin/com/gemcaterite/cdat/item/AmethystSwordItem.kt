@@ -12,7 +12,7 @@ import net.minecraft.world.entity.LivingEntity
 import net.minecraft.world.entity.ai.attributes.AttributeModifier
 import net.minecraft.world.entity.ai.attributes.Attributes
 import net.minecraft.world.entity.animal.Animal
-import net.minecraft.world.entity.monster.Monster
+import net.minecraft.world.entity.monster.Enemy
 import net.minecraft.world.item.Item
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.component.ItemAttributeModifiers
@@ -48,14 +48,17 @@ class AmethystSwordItem(properties: Properties) : Item(properties) {
                 )
                 .build()
 
-        fun isTargetable(entity: Entity): Boolean =
-            entity is Monster || entity is Animal
+        fun isHostile(entity: Entity): Boolean = entity is Enemy
+
+        fun isPassive(entity: Entity): Boolean = entity is Animal
+
+        fun isTargetable(entity: Entity): Boolean = isHostile(entity) || isPassive(entity)
 
         fun releaseVibration(
             serverLevel: ServerLevel,
             attacker: LivingEntity,
             epicenter: BlockPos,
-            bonusDamage: Double
+            damageHostile: Double   // passive animals are NEVER damaged, only glowed
         ) {
             serverLevel.gameEvent(GameEvent.SCULK_SENSOR_TENDRILS_CLICKING, epicenter, GameEvent.Context.of(attacker))
 
@@ -68,8 +71,13 @@ class AmethystSwordItem(properties: Properties) : Item(properties) {
             }
 
             for (entity in nearby) {
+                // Always glow
                 entity.addEffect(MobEffectInstance(MobEffects.GLOWING, 60, 0, false, false))
-                entity.hurt(serverLevel.damageSources().magic(), bonusDamage.toFloat())
+
+                // Only damage hostile mobs, never passive animals
+                if (isHostile(entity)) {
+                    entity.hurt(serverLevel.damageSources().magic(), damageHostile.toFloat())
+                }
             }
         }
     }
@@ -78,7 +86,6 @@ class AmethystSwordItem(properties: Properties) : Item(properties) {
         if (!isTargetable(target)) return
         val serverLevel = attacker.level() as? ServerLevel ?: return
 
-        // On hit (still alive) — small vibration pulse
         if (target.isAlive) {
             releaseVibration(serverLevel, attacker, target.blockPosition(), HIT_DAMAGE)
         }

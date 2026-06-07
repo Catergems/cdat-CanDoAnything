@@ -2,5 +2,7 @@
   "item.cdat.drill": "Drill",
   "item.cdat.hammer": "Hammer",
   "item.cdat.amethyst_sword": "Amethyst Sword",
+  "item.cdat.chunk_loader": "Chunk Loader",
+  "block.cdat.chunk_loader": "Chunk Loader",
   "itemGroup.cdat.main": "Can Do Anything"
 }

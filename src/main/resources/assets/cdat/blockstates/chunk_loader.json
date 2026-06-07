@@ -1,0 +1,5 @@
+{
+  "variants": {
+    "": { "model": "cdat:block/chunk_loader" }
+  }
+}
