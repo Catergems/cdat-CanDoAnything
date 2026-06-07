@@ -5,28 +5,28 @@ import com.gemcaterite.cdat.block.ChunkLoaderBlockEntity
 import com.gemcaterite.cdat.item.AmethystSwordItem
 import com.gemcaterite.cdat.item.DrillItem
 import com.gemcaterite.cdat.item.HammerItem
+import com.gemcaterite.cdat.network.ChunkForcePacket
 import com.mojang.logging.LogUtils
 import net.minecraft.core.registries.Registries
 import net.minecraft.network.chat.Component
+import net.minecraft.server.level.ServerLevel
 import net.minecraft.world.item.BlockItem
 import net.minecraft.world.item.CreativeModeTab
 import net.minecraft.world.item.CreativeModeTabs
 import net.minecraft.world.item.Item
 import net.minecraft.world.level.block.Block
-import net.minecraft.world.level.block.SoundType
 import net.minecraft.world.level.block.entity.BlockEntityType
-import net.minecraft.world.level.block.state.BlockBehaviour
 import net.neoforged.bus.api.IEventBus
 import net.neoforged.fml.ModContainer
 import net.neoforged.fml.common.Mod
 import net.neoforged.neoforge.common.NeoForge
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent
 import net.neoforged.neoforge.event.entity.living.LivingDeathEvent
+import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent
 import net.neoforged.neoforge.registries.DeferredBlock
 import net.neoforged.neoforge.registries.DeferredHolder
 import net.neoforged.neoforge.registries.DeferredItem
 import net.neoforged.neoforge.registries.DeferredRegister
-import net.minecraft.server.level.ServerLevel
 import java.util.function.Supplier
 
 @Mod(CanDoAnything.MODID)
@@ -38,6 +38,7 @@ class CanDoAnything(modEventBus: IEventBus, modContainer: ModContainer) {
         BLOCK_ENTITY_TYPES.register(modEventBus)
         CREATIVE_MODE_TABS.register(modEventBus)
         modEventBus.addListener(::addCreative)
+        modEventBus.addListener(ChunkForcePacket::register)
         NeoForge.EVENT_BUS.addListener(::onLivingDeath)
         LOGGER.info("[CanDoAnything] Initialized")
     }
@@ -74,33 +75,17 @@ class CanDoAnything(modEventBus: IEventBus, modContainer: ModContainer) {
         val CREATIVE_MODE_TABS: DeferredRegister<CreativeModeTab> =
             DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MODID)
 
-        // Items
-        val DRILL: DeferredItem<Item> = ITEMS.registerItem("drill") { props ->
-            DrillItem(props.durability(512))
-        }
-        val HAMMER: DeferredItem<Item> = ITEMS.registerItem("hammer") { props ->
-            HammerItem(props.durability(256))
-        }
-        val AMETHYST_SWORD: DeferredItem<Item> = ITEMS.registerItem("amethyst_sword") { props ->
-            AmethystSwordItem(props.durability(512))
-        }
+        val DRILL: DeferredItem<Item> = ITEMS.registerItem("drill") { props -> DrillItem(props.durability(512)) }
+        val HAMMER: DeferredItem<Item> = ITEMS.registerItem("hammer") { props -> HammerItem(props.durability(256)) }
+        val AMETHYST_SWORD: DeferredItem<Item> = ITEMS.registerItem("amethyst_sword") { props -> AmethystSwordItem(props.durability(512)) }
 
-        // Chunk Loader block
-        val CHUNK_LOADER_BLOCK: DeferredBlock<Block> = BLOCKS.registerBlock("chunk_loader") { props ->
-            ChunkLoaderBlock(props)
-        }
-        val CHUNK_LOADER_ITEM: DeferredItem<Item> = ITEMS.registerItem("chunk_loader") { props ->
-            BlockItem(CHUNK_LOADER_BLOCK.get(), props)
-        }
+        val CHUNK_LOADER_BLOCK: DeferredBlock<Block> = BLOCKS.registerBlock("chunk_loader") { props -> ChunkLoaderBlock(props) }
+        val CHUNK_LOADER_ITEM: DeferredItem<Item> = ITEMS.registerItem("chunk_loader") { props -> BlockItem(CHUNK_LOADER_BLOCK.get(), props) }
         val CHUNK_LOADER_BE_TYPE: DeferredHolder<BlockEntityType<*>, BlockEntityType<ChunkLoaderBlockEntity>> =
             BLOCK_ENTITY_TYPES.register("chunk_loader", Supplier {
-                BlockEntityType(
-                    { pos, state -> ChunkLoaderBlockEntity(pos, state) },
-                    setOf(CHUNK_LOADER_BLOCK.get())
-                )
+                BlockEntityType({ pos, state -> ChunkLoaderBlockEntity(pos, state) }, setOf(CHUNK_LOADER_BLOCK.get()))
             })
 
-        // Creative tab
         val CDA_TAB: DeferredHolder<CreativeModeTab, CreativeModeTab> =
             CREATIVE_MODE_TABS.register("main", Supplier {
                 CreativeModeTab.builder()
