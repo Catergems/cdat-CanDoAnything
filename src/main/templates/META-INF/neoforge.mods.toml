@@ -29,3 +29,10 @@ You can do anything like technology, Utility and equipment
     versionRange="[6.0,)"
     ordering="NONE"
     side="BOTH"
+
+[[dependencies.${mod_id}]]
+    modId="uilib"
+    type="required"
+    versionRange="[19.1.0,)"
+    ordering="NONE"
+    side="BOTH"

@@ -3,6 +3,7 @@ package com.gemcaterite.cdat.block
 import com.mojang.serialization.MapCodec
 import net.minecraft.core.BlockPos
 import net.minecraft.server.level.ServerLevel
+import net.minecraft.world.InteractionResult
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.level.ChunkPos
 import net.minecraft.world.level.Level
@@ -12,6 +13,7 @@ import net.minecraft.world.level.block.entity.BlockEntity
 import net.minecraft.world.level.block.entity.BlockEntityTicker
 import net.minecraft.world.level.block.entity.BlockEntityType
 import net.minecraft.world.level.block.state.BlockState
+import net.minecraft.world.phys.BlockHitResult
 
 class ChunkLoaderBlock(settings: Properties) : BaseEntityBlock(settings) {
 
@@ -40,6 +42,22 @@ class ChunkLoaderBlock(settings: Properties) : BaseEntityBlock(settings) {
         state: BlockState,
         type: BlockEntityType<T>
     ): BlockEntityTicker<T>? = null
+
+    override fun useWithoutItem(
+        state: BlockState,
+        level: Level,
+        pos: BlockPos,
+        player: Player,
+        hit: BlockHitResult
+    ): InteractionResult {
+        if (level.isClientSide) {
+            val chunkPos = ChunkPos(pos)
+            net.minecraft.client.Minecraft.getInstance().setScreen(
+                com.gemcaterite.cdat.screen.ChunkMapScreen(chunkPos)
+            )
+        }
+        return InteractionResult.SUCCESS
+    }
 
     override fun onPlace(
         state: BlockState,

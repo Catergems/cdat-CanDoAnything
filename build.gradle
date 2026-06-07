@@ -24,6 +24,10 @@ repositories {
         name = 'Kotlin for Forge'
         url = 'https://thedarkcolour.github.io/KotlinForForge/'
     }
+    maven {
+        name = 'DAQEM Studios Maven'
+        url = 'https://maven.daqem.com/releases'
+    }
 }
 
 base {
@@ -79,6 +83,7 @@ configurations {
 
 dependencies {
     implementation 'thedarkcolour:kotlinforforge-neoforge:6.0.0'
+    implementation 'com.daqem.uilib:uilib-neoforge:19.1.0'
 }
 
 var generateModMetadata = tasks.register("generateModMetadata", ProcessResources) {
