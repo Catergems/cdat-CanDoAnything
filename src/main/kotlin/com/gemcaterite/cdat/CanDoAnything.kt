@@ -1,6 +1,7 @@
 package com.gemcaterite.cdat
 
 import com.gemcaterite.cdat.item.AmethystSwordItem
+import com.gemcaterite.cdat.item.ChainsawItem
 import com.gemcaterite.cdat.item.DrillItem
 import com.gemcaterite.cdat.item.HammerItem
 import com.mojang.logging.LogUtils
@@ -36,6 +37,7 @@ class CanDoAnything(modEventBus: IEventBus, modContainer: ModContainer) {
         if (event.tabKey == CreativeModeTabs.TOOLS_AND_UTILITIES) {
             event.accept(DRILL.get())
             event.accept(HAMMER.get())
+            event.accept(CHAINSAW.get())
         }
         if (event.tabKey == CreativeModeTabs.COMBAT) {
             event.accept(AMETHYST_SWORD.get())
@@ -63,6 +65,7 @@ class CanDoAnything(modEventBus: IEventBus, modContainer: ModContainer) {
         val DRILL: DeferredItem<Item> = ITEMS.registerItem("drill") { props -> DrillItem(props.durability(512)) }
         val HAMMER: DeferredItem<Item> = ITEMS.registerItem("hammer") { props -> HammerItem(props.durability(256)) }
         val AMETHYST_SWORD: DeferredItem<Item> = ITEMS.registerItem("amethyst_sword") { props -> AmethystSwordItem(props.durability(512)) }
+        val CHAINSAW: DeferredItem<Item> = ITEMS.registerItem("chainsaw") { props -> ChainsawItem(props.durability(328)) }
 
         val CDA_TAB: DeferredHolder<CreativeModeTab, CreativeModeTab> =
             CREATIVE_MODE_TABS.register("main", Supplier {
@@ -74,6 +77,7 @@ class CanDoAnything(modEventBus: IEventBus, modContainer: ModContainer) {
                         output.accept(DRILL.get())
                         output.accept(HAMMER.get())
                         output.accept(AMETHYST_SWORD.get())
+                        output.accept(CHAINSAW.get())
                     }
                     .build()
             })
