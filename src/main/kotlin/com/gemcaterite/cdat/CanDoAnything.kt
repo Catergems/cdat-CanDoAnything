@@ -4,10 +4,12 @@ import com.gemcaterite.cdat.item.AmethystSwordItem
 import com.gemcaterite.cdat.item.ChainsawItem
 import com.gemcaterite.cdat.item.DrillItem
 import com.gemcaterite.cdat.item.HammerItem
+import com.gemcaterite.cdat.item.LeafHatItem
 import com.mojang.logging.LogUtils
 import net.minecraft.core.registries.Registries
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerLevel
+import net.minecraft.world.entity.EquipmentSlot
 import net.minecraft.world.item.CreativeModeTab
 import net.minecraft.world.item.CreativeModeTabs
 import net.minecraft.world.item.Item
@@ -17,6 +19,7 @@ import net.neoforged.fml.common.Mod
 import net.neoforged.neoforge.common.NeoForge
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent
 import net.neoforged.neoforge.event.entity.living.LivingDeathEvent
+import net.neoforged.neoforge.event.tick.EntityTickEvent
 import net.neoforged.neoforge.registries.DeferredHolder
 import net.neoforged.neoforge.registries.DeferredItem
 import net.neoforged.neoforge.registries.DeferredRegister
@@ -30,6 +33,7 @@ class CanDoAnything(modEventBus: IEventBus, modContainer: ModContainer) {
         CREATIVE_MODE_TABS.register(modEventBus)
         modEventBus.addListener(::addCreative)
         NeoForge.EVENT_BUS.addListener(::onLivingDeath)
+        NeoForge.EVENT_BUS.addListener(::onLivingTick)
         LOGGER.info("[CanDoAnything] Initialized")
     }
 
@@ -41,6 +45,7 @@ class CanDoAnything(modEventBus: IEventBus, modContainer: ModContainer) {
         }
         if (event.tabKey == CreativeModeTabs.COMBAT) {
             event.accept(AMETHYST_SWORD.get())
+            event.accept(LEAF_HAT.get())
         }
     }
 
@@ -52,6 +57,17 @@ class CanDoAnything(modEventBus: IEventBus, modContainer: ModContainer) {
         val heldItem = source.mainHandItem
         if (heldItem.item !is AmethystSwordItem) return
         AmethystSwordItem.releaseVibration(serverLevel, source, dead.blockPosition(), AmethystSwordItem.KILL_DAMAGE)
+    }
+
+    private fun onLivingTick(event: EntityTickEvent.Post) {
+        val entity = event.entity as? net.minecraft.world.entity.LivingEntity ?: return
+        if (entity.level().isClientSide) return
+        val helmet = entity.getItemBySlot(EquipmentSlot.HEAD)
+        if (helmet.item !is LeafHatItem) return
+        if (!entity.onGround() && entity.deltaMovement.y < 0) {
+            val vel = entity.deltaMovement
+            entity.deltaMovement = vel.multiply(1.0, 0.85, 1.0)
+        }
     }
 
     companion object {
@@ -66,6 +82,7 @@ class CanDoAnything(modEventBus: IEventBus, modContainer: ModContainer) {
         val HAMMER: DeferredItem<Item> = ITEMS.registerItem("hammer") { props -> HammerItem(props.durability(256)) }
         val AMETHYST_SWORD: DeferredItem<Item> = ITEMS.registerItem("amethyst_sword") { props -> AmethystSwordItem(props.durability(512)) }
         val CHAINSAW: DeferredItem<Item> = ITEMS.registerItem("chainsaw") { props -> ChainsawItem(props.durability(328)) }
+        val LEAF_HAT: DeferredItem<Item> = ITEMS.registerItem("leaf_hat") { props -> LeafHatItem(props.stacksTo(1)) }
 
         val CDA_TAB: DeferredHolder<CreativeModeTab, CreativeModeTab> =
             CREATIVE_MODE_TABS.register("main", Supplier {
@@ -78,6 +95,7 @@ class CanDoAnything(modEventBus: IEventBus, modContainer: ModContainer) {
                         output.accept(HAMMER.get())
                         output.accept(AMETHYST_SWORD.get())
                         output.accept(CHAINSAW.get())
+                        output.accept(LEAF_HAT.get())
                     }
                     .build()
             })

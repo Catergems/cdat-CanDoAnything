@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "LLL",
+    "I  ",
+    "I  "
+  ],
+  "key": {
+    "L": "minecraft:oak_leaves",
+    "I": "minecraft:stick"
+  },
+  "result": {
+    "id": "cdat:leaf_hat",
+    "count": 1
+  }
+}
